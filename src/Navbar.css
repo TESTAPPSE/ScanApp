@@ -1,0 +1,27 @@
+/* Navbar.css */
+/* Styles for the navbar container */
+.navbar {
+    text-align: center; /* Center the links horizontally */
+  }
+  
+  /* Styles for the list of links */
+  .navbar ul {
+    list-style: none; /* Remove the default list style */
+    padding: 0; /* Remove any default padding */
+    display: flex; /* Display the links in a row */
+    justify-content: center; /* Center the links horizontally */
+    flex-direction: row; /* Ensure links are displayed horizontally */
+  }
+  
+  /* Styles for each individual link */
+  .navbar a {
+    text-decoration: none; /* Remove underline */
+    color: #333; /* Link text color */
+    font-weight: bold; /* Link text font weight */
+    margin: 0 20px; /* Add spacing between links */
+  }
+  
+  .navbar a:hover {
+    color: #007bff; /* Link text color on hover */
+  }
+  
