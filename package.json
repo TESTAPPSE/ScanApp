@@ -16,6 +16,7 @@
     "child_process": "^1.0.2",
     "classnames": "^2.3.2",
     "cors": "^2.8.5",
+    "material-icons": "^1.13.10",
     "mssql": "^9.1.1",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.22",
@@ -54,5 +55,8 @@
   },
   "browser": {
     "child_process": false
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1"
   }
 }

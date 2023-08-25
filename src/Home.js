@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 
 const DataTable = () => {
   const [data, setData] = useState([]);
-  const ip="10.110.15.107"
+  const ip="10.110.21.216"
 
   useEffect(() => {
     // Replace with your backend API URL

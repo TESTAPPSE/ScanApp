@@ -9,7 +9,7 @@ const DataPage = () => {
   const [data, setData] = useState([]);
   const [name, setInput1] = useState('');
   const [email, setInput2] = useState('');
- const ip = '10.110.15.107';
+ const ip = '10.110.21.216';
   const handleAddData = async () => {
     try {
       const currentDate = new Date(); // Get the current date and time
@@ -86,8 +86,8 @@ const DataPage = () => {
             <tr key={index} style={{  '&:hover': {
                 backgroundColor: '#f0f0f0', // Change the background color of the table row on hover
               },}}>
-              <td>{item.name}</td>
-              <td>{item.email}</td>
+              <td>{item.Product}</td>
+              <td>{item.Quantity}</td>
               <td>{item.date}</td>
             </tr>
           ))}

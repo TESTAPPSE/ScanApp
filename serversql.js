@@ -114,7 +114,7 @@ db.connect((err) => {
 app.post('/create', (req, res) => {                                                                                               
   const { name, email, date } = req.body;                                                                                               
                                                                                                
-  const query = `INSERT INTO users (name, email, date) VALUES (?, ?, ?)`;                                                                                               
+  const query = `INSERT INTO users (Product, Quantity, date) VALUES (?, ?, ?)`;                                                                                               
   db.query(query, [name, email, date], (error, results) => {                                                                                               
     if (error) {                                                                                               
       console.error('Error creating user:', error);                                                                                               
@@ -181,13 +181,14 @@ app.get('/readT3', (req, res) => {
     }                                                                                               
   });                                                                                               
 });  
+
 app.get('/t3', (req, res) => {    
   const query1=`DELETE FROM compadata`
   db.query(query1)                                                                        
  // const query = `SELECT * FROM users`;        
  const query =`INSERT INTO compadata (PrNum, quantity1, quantity2)
-SELECT p.Art, p.Qnt ,p1.email  FROM sapdata p
-INNER JOIN users p1 ON p.Art = p1.name`
+SELECT p.Art, p.Qnt ,p1.Quantity  FROM sapdata p
+INNER JOIN users p1 ON p.Art = p1.Product`
                                                                                          
   db.query(query, (error, results) => { 
                                                                                                
@@ -198,7 +199,54 @@ INNER JOIN users p1 ON p.Art = p1.name`
       res.json(results);                                                                                               
     }                                                                                               
   });                                                                                               
-});                                                                                        
+});              
+// DELETE route to delete data by ID
+app.delete('/delete/:id', (req, res) => {
+  const itemId = req.params.id;
+
+  // Execute a DELETE SQL query to delete the data from your database
+  const sql = 'DELETE FROM users WHERE id = ?';
+
+  db.query(sql, [itemId], (err, result) => {
+    if (err) {
+      console.error('Error deleting data: ' + err.stack);
+      return res.status(500).json({ error: 'Error deleting data' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Data not found' });
+    }
+
+    res.json({ message: 'Data deleted successfully' });
+  });
+});
+
+// ... (previous code)
+
+// PUT or PATCH route to update data by ID
+app.put('/update/:id', (req, res) => {
+  const itemId = req.params.id;
+  const { newQuantity } = req.body;
+
+  // Execute a SQL query to update the data in your database
+  const sql = 'UPDATE users SET Quantity = ? WHERE id = ?';
+
+  db.query(sql, [newQuantity, itemId], (err, result) => {
+    if (err) {
+      console.error('Error updating data: ' + err.stack);
+      return res.status(500).json({ error: 'Error updating data' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Data not found' });
+    }
+
+    res.json({ message: 'Data updated successfully' });
+  });
+});
+
+// ... (remaining code)
+
 app.get('/readSap', (req, res) => {                                                                                               
   const query = `SELECT * FROM SAPDATA`;                                                                                               
   db.query(query, (error, results) => {                                                                                               
@@ -211,7 +259,7 @@ app.get('/readSap', (req, res) => {
   });                                                                                               
 });                                                                                               
                                                                                                
-app.put('/update/:id', (req, res) => {                                                                                               
+app.put('/update545120/:id', (req, res) => {                                                                                               
   const { name, email, age } = req.body;                                                                                               
   const userId = req.params.id;                                                                                               
                                                                                                
@@ -240,7 +288,7 @@ app.post('/t30203', (req, res) => {
     WHERE Art = name
   `;
 const query =`INSERT INTO compadata (PrNum, quantity1, quantity2)
-SELECT p.Art, p.Qnt ,p1.email  FROM sapdata p
+SELECT p.Art, p.Qnt ,p1.Quantity  FROM sapdata p
 INNER JOIN users p1 ON p.Art = p1.name`
   db.query(query, (err, result) => {
     if (err) {
