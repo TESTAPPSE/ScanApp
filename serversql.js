@@ -111,7 +111,7 @@ db.connect((err) => {
   }                                                                                               
 });                                                                                               
                                                                                                
-app.post('/create', (req, res) => {                                                                                               
+app.post('/create1', (req, res) => {                                                                                               
   const { name, email, date } = req.body;                                                                                               
                                                                                                
   const query = `INSERT INTO users (Product, Quantity, date) VALUES (?, ?, ?)`;                                                                                               
@@ -124,7 +124,26 @@ app.post('/create', (req, res) => {
     }                                                                                               
   });                                                                                               
 });                                                                                               
-                                                                                               
+       // Server code
+       app.post('/create', (req, res) => {
+        const { name, email, date } = req.body;
+      
+        const insertQuery = `INSERT INTO users (Product, Quantity, date) VALUES (?, ?, ?)`;
+        db.query(insertQuery, [name, email, date], (error, results) => {
+          if (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+              // Duplicate entry error, product already exists
+              res.status(400).json({ message: 'Product already exists' });
+            } else {
+              console.error('Error creating user:', error);
+              res.status(500).json({ message: 'Failed to create user' });
+            }
+          } else {
+            res.status(200).json({ message: 'User created successfully' });
+          }
+        });
+      });
+                                                                                        
 app.get('/read', (req, res) => {                                                                                               
   const query = `SELECT * FROM users`;                                                                                               
   db.query(query, (error, results) => {                                                                                               

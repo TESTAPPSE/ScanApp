@@ -4,10 +4,14 @@ import './DataTable.css'; // Import the CSS file
 import Navbar from './Navbar';
 import * as XLSX from 'xlsx'; // Import the xlsx library
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
 const DataTable = () => {
   const [data, setData] = useState([]);
-  const ip="10.110.21.216"
+  const [productNameSearch, setProductNameSearch] = useState('');
+  const [scannedQuantitySearch, setScannedQuantitySearch] = useState('');
+  const [sapQuantitySearch, setSapQuantitySearch] = useState('');
+  const ip = '10.110.21.216';
 
   useEffect(() => {
     // Replace with your backend API URL
@@ -18,12 +22,7 @@ const DataTable = () => {
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
-    axios.get(`http://` + ip + `:5005/t3`)
-      .then((response) => {
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
+
   }, []);
 
   // Function to export data to Excel
@@ -33,6 +32,7 @@ const DataTable = () => {
       Product: item.PrNum,
       Quantity1: item.quantity1,
       Quantity2: item.quantity2,
+      Date: item.date,
     }));
 
     const ws = XLSX.utils.json_to_sheet(filteredData);
@@ -41,11 +41,43 @@ const DataTable = () => {
     XLSX.writeFile(wb, "MismatchedData.xlsx");
   };
 
+  // Function to filter data based on search inputs
+  const filteredData = data.filter((item) => {
+    const productNameMatch =
+      productNameSearch === '' || item.PrNum.toLowerCase().includes(productNameSearch.toLowerCase());
+    const scannedQuantityMatch =
+      scannedQuantitySearch === '' || item.quantity1 === scannedQuantitySearch;
+    const sapQuantityMatch =
+      sapQuantitySearch === '' || item.quantity2 === sapQuantitySearch;
+  
+    return productNameMatch && scannedQuantityMatch && sapQuantityMatch;
+  });
+
   return (
     <div>
       <Navbar />
       <div className="table-container">
         <h2>Mismatched Data</h2>
+        <div>
+          <TextField
+            type="text"
+            placeholder="Search by Product Name"
+            value={productNameSearch}
+            onChange={(e) => setProductNameSearch(e.target.value)}
+          />
+          <TextField
+            type="text"
+            placeholder="Search by Scanned Quantity"
+            value={scannedQuantitySearch}
+            onChange={(e) => setScannedQuantitySearch(e.target.value)}
+          />
+          <TextField
+            type="text"
+            placeholder="Search by SAP Quantity"
+            value={sapQuantitySearch}
+            onChange={(e) => setSapQuantitySearch(e.target.value)}
+          />
+        </div>
         {/* Add an export button */}
         <Button onClick={exportToExcel}>Export to Excel</Button>
         <table className="table">
@@ -54,10 +86,11 @@ const DataTable = () => {
               <th>Product</th>
               <th>Scanned Quantity</th>
               <th>SAP Quantity</th>
+              <th>Date</th>
               {/* Add more table headers as needed */}
             </tr>
           </thead>
-          {data.map((item) => (
+          {filteredData.map((item) => (
             <tr
               key={item.id}
               style={{
@@ -70,6 +103,7 @@ const DataTable = () => {
               <td>{item.PrNum}</td>
               <td>{item.quantity1}</td>
               <td>{item.quantity2}</td>
+              <td>{item.date}</td>
               {/* Add more table data cells as needed */}
             </tr>
           ))}

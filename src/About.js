@@ -4,19 +4,21 @@ import './DataTable.css'; // Import the CSS file
 import Navbar from './Navbar';
 import * as XLSX from 'xlsx'; // Import the xlsx library
 import Button from '@mui/material/Button';
-import ConfirmationDialog from './ConfirmationDialog'; // Import the ConfirmationDialog component
+import ConfirmationDialog from './ConfirmationDialog'; // Import the ConfirmationDialog component;
+import TextField from '@mui/material/TextField';
 
 const DataTable = () => {
-  const ip = '10.110.21.216';
-
   const [data, setData] = useState([]);
   const [editingItemId, setEditingItemId] = useState(null);
   const [newQuantity, setNewQuantity] = useState('');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [itemIdToDelete, setItemIdToDelete] = useState(null);
+  const [productNameSearch, setProductNameSearch] = useState('');
+  const [quantitySearch, setQuantitySearch] = useState('');
+  const [scanDateSearch, setScanDateSearch] = useState('');
+  const ip = '10.110.21.216';
 
   useEffect(() => {
-    // Replace with your backend API URL
     fetchData();
   }, []);
 
@@ -30,23 +32,19 @@ const DataTable = () => {
   };
 
   const handleEditClick = (itemId, initialQuantity) => {
-    // Set the editing item ID and initial quantity
     setEditingItemId(itemId);
     setNewQuantity(initialQuantity);
   };
 
   const handleSaveClick = async (itemId) => {
     try {
-      // Send a PUT request to update the quantity for the specified item
       await axios.put(`http://` + ip + `:5005/update/${itemId}`, {
         newQuantity,
       });
 
-      // Clear editing state
       setEditingItemId(null);
       setNewQuantity('');
 
-      // Fetch and update the data from the server after update
       fetchData();
     } catch (error) {
       console.error('Error updating data:', error);
@@ -55,22 +53,16 @@ const DataTable = () => {
 
   const confirmDelete = async () => {
     try {
-      // Send a DELETE request to remove the item from the server
       await axios.delete(`http://` + ip + `:5005/delete/${itemIdToDelete}`);
-
-      // Fetch and update the data from the server after deletion
       fetchData();
     } catch (error) {
       console.error('Error deleting data:', error);
     } finally {
-      // Close the confirmation dialog
       setShowDeleteConfirmation(false);
     }
   };
 
-  // Function to export data to Excel
   const exportToExcel = () => {
-    // Create a new array with only the desired columns
     const filteredData = data.map((item) => ({
       Product: item.Product,
       "Scanned Quantity": item.Quantity,
@@ -83,11 +75,45 @@ const DataTable = () => {
     XLSX.writeFile(wb, "ScannedData.xlsx");
   };
 
+  // Function to filter data based on search inputs
+  const filteredData = data.filter((item) => {
+    const productName = item.Product.toLowerCase();
+    const quantity = item.Quantity.toString();
+    const scanDate = item.date.toLowerCase();
+
+    const productNameMatch =
+      productNameSearch === '' || productName===(productNameSearch.toLowerCase());
+    const quantityMatch = quantitySearch === '' || quantity===(quantitySearch);
+    const scanDateMatch = scanDateSearch === '' || scanDate===(scanDateSearch.toLowerCase());
+
+    return productNameMatch && quantityMatch && scanDateMatch;
+  });
+
   return (
     <div>
       <Navbar />
       <div className="table-container">
         <h2>Scanned Data</h2>
+        <div>
+          <TextField
+            type="text"
+            placeholder="Search by Product Name"
+            value={productNameSearch}
+            onChange={(e) => setProductNameSearch(e.target.value)}
+          />
+          <TextField
+            type="text"
+            placeholder="Search by Quantity"
+            value={quantitySearch}
+            onChange={(e) => setQuantitySearch(e.target.value)}
+          />
+          <TextField
+            type="text"
+            placeholder="Search by Scan Date"
+            value={scanDateSearch}
+            onChange={(e) => setScanDateSearch(e.target.value)}
+          />
+        </div>
         {/* Add an export button */}
         <Button onClick={exportToExcel}>Export to Excel</Button>
         <table className="table">
@@ -101,7 +127,7 @@ const DataTable = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((item) => (
+            {filteredData.map((item) => (
               <tr key={item.id}>
                 <td>{item.Product}</td>
                 <td>
