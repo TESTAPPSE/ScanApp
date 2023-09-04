@@ -35,6 +35,7 @@ const DataPage = () => {
     } catch (error) {
       console.error('Error inserting data:', error);
     }
+    window.location.reload();
   };
 
   const fetchData = async () => {

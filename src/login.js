@@ -16,14 +16,14 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-        const response = await axios.post('http://10.110.21.216:5005/login', {
+        const response = await axios.post('http://10.110.21.216:5000/login', {
           username,
           password,
         });
   
         if (response.data.success) {
           // Authentication successful, you can redirect or perform other actions here
-          navigate('/Scan');
+          navigate('/PA1');
         } else {
          navigate('/');
         }
