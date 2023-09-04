@@ -228,7 +228,27 @@ app.get('/data/:tableName', (req, res) => {
     }
   });
 });
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
 
+  const query = 'SELECT * FROM login WHERE username = ? AND password = ?';
+
+  db.query(query, [username, password], (err, results) => {
+    if (err) {
+      console.error('Database query error: ' + err.stack);
+      res.status(500).json({ error: 'Database error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      // User found
+      res.json({ success: true, message: 'Login successful' });
+    } else {
+      // User not found
+      res.json({ success: false, message: 'Login failed' });
+    }
+  });
+});
 app.delete('/delete/:tableName', (req, res) => {
   const { tableName } = req.params;
 
