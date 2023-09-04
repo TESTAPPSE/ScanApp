@@ -1,0 +1,51 @@
+/* src/DataTable.css */
+.table-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    border: 10px;
+    border-color: black;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  tr:hover {
+    background-color: #ddd;
+  }
+  /* DataTable.css */
+/* Regular row style */
+.table tbody tr {
+  background-color: #fff; /* Default background color */
+}
+
+/* Red background for rows where quantity1 is different from quantity2 */
+.table tbody tr.different-quantities {
+  background-color: #ff0000; /* Red background color */
+  color: #fff; /* White text color for better visibility */
+}
+.table-separator td {
+  border-bottom: 1px solid #ddd;
+  padding: 0;
+}
+.tableRow:hover {
+  background-color: #f0f0f0; /* Change the background color of the table row on hover */
+}
