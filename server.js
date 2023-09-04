@@ -45,7 +45,7 @@ app.get('/tables', async (req, res) => {
     const query = `
       SELECT table_name
       FROM information_schema.tables
-      WHERE table_schema = ?
+      WHERE table_schema = ? AND table_name != 'login'
     `;
 
     db.query(query, [db.config.database], (error, results) => {
@@ -96,6 +96,24 @@ app.get('/data/:tableName', (req, res) => {
       res.json(results);
     }
   });
+});
+// Add this route in your Express.js server
+app.post('/renameTable/:oldTableName/:newTableName', async (req, res) => {
+  try {
+    const { oldTableName, newTableName } = req.params;
+
+    // Execute the SQL query to rename the table
+    const renameQuery = `ALTER TABLE \`${oldTableName}\` RENAME TO \`${newTableName}\``;
+    await query(renameQuery);
+
+    res.send('Table renamed successfully.');
+    console.log('did it')
+  } catch (error) {
+    console.error(error);
+    console.log(error)
+    res.status(500).send('Error renaming the table.');
+
+  }
 });
 
 app.delete('/delete/:tableName', (req, res) => {
@@ -154,6 +172,10 @@ app.post('/upload', async (req, res) => {
       adjustedColumnNames.push(adjustedColumnName);
     }
 
+    // Add a "Status" column
+    const statusColumnName = 'Status';
+    adjustedColumnNames.push(statusColumnName);
+
     const fileNameWithoutExtension = excelFile.name.replace(/\.[^/.]+$/, '');
 
     // Remove the (4) suffix if it exists
@@ -183,10 +205,12 @@ app.post('/upload', async (req, res) => {
       const values = [];
       for (let i = 2; i <= rowCount; i++) {
         const rowValues = [];
-        for (let j = 1; j <= adjustedColumnNames.length; j++) {
+        for (let j = 1; j <= adjustedColumnNames.length - 1; j++) {
           const cell = worksheet.getCell(`${String.fromCharCode(64 + j)}${i}`);
           rowValues.push(cell ? cell.value : ''); // Use an empty string for empty cells
         }
+        // Add the 'Not Verified' status to each row
+        rowValues.push('Not Verified');
         values.push(rowValues);
       }
 
@@ -209,6 +233,38 @@ app.post('/upload', async (req, res) => {
     }
 
     res.status(500).send(errorMessage);
+  }
+});
+
+
+// Your database connection setup code goes here
+
+// Define an API endpoint for updating the status
+app.post('/updateStatus/:tableName/:rowId', async (req, res) => {
+  try {
+    const { tableName, rowId } = req.params;
+    const { Status } = req.body; // Assuming you pass the new status in the request body
+
+    // Update the status of the row in your database
+    // Replace this code with your database update logic
+    // For example, if you're using MySQL with a library like 'mysql2':
+    const sql = `UPDATE ${tableName} SET Status = ? WHERE id = ?`;
+    const values = [Status, rowId];
+
+    db.query(sql, values, (error, results) => {
+      if (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while updating the status' });
+      } else {
+        res.status(200).json({ message: 'Status updated successfully' });
+      }
+    });
+
+    // Replace the code above with your database-specific logic
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while updating the status' });
   }
 });
 
