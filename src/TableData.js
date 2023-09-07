@@ -14,38 +14,28 @@ function TableData() {
   const { tableName } = useParams();
   const [tableData, setTableData] = useState([]);
   const [scannedData, setScannedData] = useState('');
+  const [manualVerificationData, setManualVerificationData] = useState('');
   const [selectedColumn, setSelectedColumn] = useState('');
   const [exportData, setExportData] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchTableData(tableName);
-    
   }, [tableName]);
 
   useEffect(() => {
     if (scannedData && selectedColumn) {
-      const matchingRow = tableData.find((row) => {
-        if (selectedColumn === 'id') {
-          // Handle the "id" column differently
-          return row[selectedColumn] === scannedData;
-        } else if (row[selectedColumn] && row[selectedColumn]===(scannedData)) {
-          return true;
-        }
-        return false;
-      });
-  
-      if (matchingRow) {
-        const updatedTableData = tableData.map((row) =>
-          row.id === matchingRow.id ? { ...row, Status: 'Verified' } : row
-        );
-        setTableData(updatedTableData);
-      }
-  
-      setScannedData('');
+      verifyData(scannedData);
+      setScannedData('')
     }
   }, [scannedData, selectedColumn, tableData]);
-  
+
+  // useEffect(() => {
+  //   if (manualVerificationData && selectedColumn) {
+  //     verifyData(manualVerificationData);
+  //   }
+  // }, [manualVerificationData, selectedColumn, tableData]);
+
   const fetchTableData = (tableName) => {
     fetch(`http://10.110.21.216:5000/data/${tableName}`)
       .then((response) => response.json())
@@ -58,6 +48,24 @@ function TableData() {
       .catch((error) => {
         console.error(error);
       });
+  };
+
+  const verifyData = (dataToVerify) => {
+    const matchingRow = tableData.find((row) => {
+      if (selectedColumn === 'id') {
+        return row[selectedColumn] === dataToVerify;
+      } else if (row[selectedColumn] && row[selectedColumn].includes(dataToVerify)) {
+        return true;
+      }
+      return false;
+    });
+
+    if (matchingRow) {
+      const updatedTableData = tableData.map((row) =>
+        row.id === matchingRow.id ? { ...row, Status: 'Verified' } : row
+      );
+      setTableData(updatedTableData);
+    }
   };
 
   const exportToExcel = (type) => {
@@ -94,44 +102,35 @@ function TableData() {
 
       // Check if the table name already contains "_unfinished" or "_verified"
       if (oldTableName.includes('_unfinished') && allVerified) {
-        // If the table name ends with "_unfinished" and all rows are verified, remove "_unfinished"
         newTableName = oldTableName.replace('_unfinished', '_verified');
       } else if (oldTableName.includes('_verified') && !allVerified) {
-        // If the table name ends with "_verified" and not all rows are verified, replace "_verified" with "_unfinished"
         newTableName = oldTableName.replace('_verified', '_unfinished');
       } else if (!oldTableName.includes('_unfinished') && !oldTableName.includes('_verified')) {
-        // If the table name doesn't contain "_unfinished" or "_verified" and not all rows are verified, append "_unfinished"
         newTableName = allVerified ? `${oldTableName}_verified` : `${oldTableName}_unfinished`;
       } else {
-        // In all other cases, keep the table name unchanged
         newTableName = oldTableName;
       }
 
-      // Rename the table in the database
       await fetch(`http://10.110.21.216:5000/renameTable/${oldTableName}/${newTableName}`, {
         method: 'POST',
       });
 
-      // Update the "Status" of rows with "Verified" in the database
       await Promise.all(
         tableData
           .filter((row) => row.Status === 'Verified')
           .map(async (row) => {
-            // Update the database with the new status (e.g., 'Completed')
             await fetch(`http://10.110.21.216:5000/updateStatus/${newTableName}/${row.id}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ Status: 'Verified' }), // You may adjust the status value as needed
+              body: JSON.stringify({ Status: 'Verified' }),
             });
           })
       );
 
-     
     } catch (error) {
       console.error(error);
-      // Handle any errors that occur during the renaming process or status update
     }
     navigate('/PA1');
   };
@@ -155,10 +154,9 @@ function TableData() {
                       >
                         {tableData.length > 0 &&
                           Object.keys(tableData[0]).map((key, index) => (
-                              <MenuItem key={index} value={key}>
-                                {key}
-                              </MenuItem>
-                            
+                            <MenuItem key={index} value={key}>
+                              {key}
+                            </MenuItem>
                           ))}
                       </Select>
                     </FormControl>
@@ -171,16 +169,32 @@ function TableData() {
                     variant="outlined"
                     value={scannedData}
                     onChange={(e) => setScannedData(e.target.value)}
+                   
+                  />
+                </td>
+                <td>
+                  <TextField
+                    fullWidth
+                    label="Manual Verification Data"
+                    variant="outlined"
+                    value={manualVerificationData}
+                    onChange={(e) => setManualVerificationData(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        verifyData(manualVerificationData);
+                        setManualVerificationData('');
+                      }
+                    }}
                   />
                 </td>
               </tr>
             </thead>
           </table>
           <div className="table-content">
-          <Button onClick={() => exportToExcel('verified')}>Export Verified Data</Button>
-        <Button onClick={() => exportToExcel('notVerified')}>Export Not Verified Data</Button>
-        <Button onClick={() => exportToExcel('allData')}>Export All Data</Button>
-        <Button onClick={() => saveAndExit()}>Save and Exit</Button>
+            <Button onClick={() => exportToExcel('verified')}>Export Verified Data</Button>
+            <Button onClick={() => exportToExcel('notVerified')}>Export Not Verified Data</Button>
+            <Button onClick={() => exportToExcel('allData')}>Export All Data</Button>
+            <Button onClick={() => saveAndExit()}>Save and Exit</Button>
             <table className="table">
               <thead>
                 <tr>
@@ -190,7 +204,7 @@ function TableData() {
                     ))}
                 </tr>
               </thead>
-              
+             
                 {tableData.map((row, rowIndex) => (
                   <tr
                     key={rowIndex}
@@ -203,11 +217,10 @@ function TableData() {
                     ))}
                   </tr>
                 ))}
-              
+       
             </table>
           </div>
         </div>
-       
       </div>
     </div>
   );
