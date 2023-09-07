@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import Navbar from './Navbar';
 import * as XLSX from 'xlsx';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
@@ -9,6 +8,26 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
+// CSS for the inline navbar
+const navbarStyle = {
+   backgroundColor: '#1f4d7e', // Blue background color
+  padding: '10px 10px', // Adjust padding as needed
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  position: 'fixed', // Make the navbar fixed
+  top: '0', // Set the top position to 0 to fix it at the top
+  width: '98%', // Make the navbar full width
+  zIndex: '1000',
+  borderRadius: '15px 15px 15px 15px'
+  
+};
+
+const navbarTextStyle = {
+  color: '#fff', // White text color
+  fontSize: '26px', // Adjust font size as needed
+  fontWeight: 'bold',
+};                                              
 
 function TableData() {
   const { tableName } = useParams();
@@ -26,7 +45,7 @@ function TableData() {
   useEffect(() => {
     if (scannedData && selectedColumn) {
       verifyData(scannedData);
-      setScannedData('')
+      setScannedData('');
     }
   }, [scannedData, selectedColumn, tableData]);
 
@@ -54,7 +73,7 @@ function TableData() {
     const matchingRow = tableData.find((row) => {
       if (selectedColumn === 'id') {
         return row[selectedColumn] === dataToVerify;
-      } else if (row[selectedColumn] && row[selectedColumn].includes(dataToVerify)) {
+      } else if (row[selectedColumn] && row[selectedColumn]===(dataToVerify)) {
         return true;
       }
       return false;
@@ -67,6 +86,7 @@ function TableData() {
       setTableData(updatedTableData);
     }
   };
+
 
   const exportToExcel = (type) => {
     const filteredData = tableData.filter((row) => {
@@ -137,7 +157,11 @@ function TableData() {
 
   return (
     <div>
-      <div className="table-container">
+      <div style={navbarStyle}>
+        <div style={navbarTextStyle}>SEBN,TN</div>
+        <div style={navbarTextStyle}><span style={{fontSize:"18px",cursor:"pointer"}} onClick={()=>navigate("/")}>LogOut</span></div>
+        </div>
+      <div className="table-container" style={{marginTop:"70px"}}>
         <h2>File Data: {tableName}</h2>
         <div className="table-scroll">
           <table className='table'>

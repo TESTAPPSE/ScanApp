@@ -518,17 +518,37 @@ import IconButton from '@mui/material/IconButton';
 import SaveIcon from '@mui/icons-material/Save';                                                                                                  
 import ConfirmationDialog from './ConfirmationDialog';   
 import UploadFileIcon from '@mui/icons-material/UploadFile';                                                                                               
-                                                                                                  
+import { useNavigate } from 'react-router-dom';
+                                  
 function App() {                                                                                                  
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);                                                                                                  
-                                                                                                  
+  const navigate = useNavigate();
+                                                    
   const [file, setFile] = useState(null);                                                                                                  
   const [uploadedFiles, setUploadedFiles] = useState([]);                                                                                                  
   const [tableNames, setTableNames] = useState([]);                                                                                                  
   const [selectedTable, setSelectedTable] = useState(null);                                                                                                  
   const [tableData, setTableData] = useState([]);                                                                                                  
   const [tableToDelete, setTableToDelete] = useState(null);                                                                                                  
-                                                                                                  
+                 // CSS for the inline navbar
+const navbarStyle = {
+  backgroundColor: '#1f4d7e', // Blue background color
+  padding: '10px 10px', // Adjust padding as needed
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  position: 'fixed', // Make the navbar fixed
+  top: '0', // Set the top position to 0 to fix it at the top
+  width: '98%', // Make the navbar full width
+  zIndex: '1000',
+  borderRadius: '15px 15px 15px 15px'
+};
+
+const navbarTextStyle = {
+  color: '#fff', // White text color
+  fontSize: '26px', // Adjust font size as needed
+  fontWeight: 'bold',
+};                                                                                 
   useEffect(() => {                                                                                                  
     // Fetch the list of uploaded files and table names when the component mounts                                                                                                  
     fetchUploadedFiles();                                                                                                  
@@ -639,8 +659,12 @@ function App() {
   };                                                                                                  
                                                                                                   
   return (                                                                                                  
-    <div>                                                                                                  
-      <div className="table-container">                                                                                                  
+    <div>       
+        <div style={navbarStyle}>
+        <div style={navbarTextStyle}>SEBN,TN</div>
+        <div style={navbarTextStyle}><span style={{fontSize:"18px",cursor:"pointer"}} onClick={()=>navigate("/")}>LogOut</span></div>
+        </div>                                                                                           
+      <div className="table-container" style={{marginTop:"70px"}}>                                                                                                  
         <input                                                                                                  
           type="file"                                                                                                  
           accept=".xlsx"                                                                                                  
