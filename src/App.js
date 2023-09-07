@@ -25,12 +25,12 @@ function App() {
         
           <Routes>
           <Route path="/table/:tableName"  element={<TableData />}/>
-          <Route path="/FileList" element={<FileList />} />
+          {/* <Route path="/FileList" element={<FileList />} /> */}
         <Route path="/PA1" element={<ShowData />} />
-          <Route path="/home" element={<Home />} />
+          {/* <Route path="/home" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="Scan" element={<ScanNew />} />
+            <Route path="Scan" element={<ScanNew />} /> */}
           </Routes>
         </div>
       </div>

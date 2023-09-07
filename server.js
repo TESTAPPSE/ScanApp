@@ -190,9 +190,15 @@ app.post('/upload', async (req, res) => {
     const tableExists = await query(`SHOW TABLES LIKE '${tableName}'`);
     if (tableExists.length === 0) {
       // Create the table schema based on adjusted column names
-      const createTableQuery = `CREATE TABLE ${tableName} (
-        ${adjustedColumnNames.map((name) => `\`${name}\` VARCHAR(255)`).join(', ')}
-      )`;
+      let createTableQuery = `CREATE TABLE ${tableName} (
+        id INT AUTO_INCREMENT PRIMARY KEY,`;
+
+      for (const adjustedColumnName of adjustedColumnNames) {
+        createTableQuery += `\`${adjustedColumnName}\` VARCHAR(255),`;
+      }
+
+      createTableQuery = createTableQuery.slice(0, -1); // Remove the trailing comma
+      createTableQuery += ')';
 
       await query(createTableQuery); // Use the promisified query function
     }
@@ -235,7 +241,6 @@ app.post('/upload', async (req, res) => {
     res.status(500).send(errorMessage);
   }
 });
-
 
 // Your database connection setup code goes here
 

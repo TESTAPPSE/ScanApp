@@ -20,41 +20,45 @@ function TableData() {
 
   useEffect(() => {
     fetchTableData(tableName);
+    
   }, [tableName]);
 
   useEffect(() => {
     if (scannedData && selectedColumn) {
       const matchingRow = tableData.find((row) => {
-        if (row[selectedColumn] && row[selectedColumn].includes(scannedData)) {
+        if (selectedColumn === 'id') {
+          // Handle the "id" column differently
+          return row[selectedColumn] === scannedData;
+        } else if (row[selectedColumn] && row[selectedColumn]===(scannedData)) {
           return true;
         }
         return false;
       });
-
+  
       if (matchingRow) {
         const updatedTableData = tableData.map((row) =>
           row.id === matchingRow.id ? { ...row, Status: 'Verified' } : row
         );
         setTableData(updatedTableData);
       }
-
+  
       setScannedData('');
     }
   }, [scannedData, selectedColumn, tableData]);
-
+  
   const fetchTableData = (tableName) => {
     fetch(`http://10.110.21.216:5000/data/${tableName}`)
-    .then((response) => response.json())
-    .then((data) => {
-      setTableData(data); // Set the data as is, without modifying the "Status" column
-      if (data.length > 0) {
-        setSelectedColumn(Object.keys(data[0])[0]);
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
+      .then((response) => response.json())
+      .then((data) => {
+        setTableData(data);
+        if (data.length > 0) {
+          setSelectedColumn(Object.keys(data[0])[0]);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   const exportToExcel = (type) => {
     const filteredData = tableData.filter((row) => {
@@ -83,11 +87,11 @@ function TableData() {
     try {
       // Check if all rows are verified
       const allVerified = tableData.every((row) => row.Status === 'Verified');
-  
+
       // Prepare the new table name based on the old table name
       const oldTableName = tableName;
       let newTableName;
-  
+
       // Check if the table name already contains "_unfinished" or "_verified"
       if (oldTableName.includes('_unfinished') && allVerified) {
         // If the table name ends with "_unfinished" and all rows are verified, remove "_unfinished"
@@ -102,15 +106,12 @@ function TableData() {
         // In all other cases, keep the table name unchanged
         newTableName = oldTableName;
       }
-  
-      
-     
-  
+
       // Rename the table in the database
       await fetch(`http://10.110.21.216:5000/renameTable/${oldTableName}/${newTableName}`, {
         method: 'POST',
       });
-  
+
       // Update the "Status" of rows with "Verified" in the database
       await Promise.all(
         tableData
@@ -126,7 +127,7 @@ function TableData() {
             });
           })
       );
-  
+
      
     } catch (error) {
       console.error(error);
@@ -134,75 +135,79 @@ function TableData() {
     }
     navigate('/PA1');
   };
-  
 
   return (
     <div>
       <div className="table-container">
         <h2>File Data: {tableName}</h2>
-        <table className='table'>
-          <thead>
-            <tr>
-              <td>
-                <div>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel>Select Column</InputLabel>
-                    <Select
-                      value={selectedColumn}
-                      onChange={(e) => setSelectedColumn(e.target.value)}
-                      label="Select Column"
-                    >
-                      {tableData.length > 0 &&
-                        Object.keys(tableData[0]).map((key, index) => (
-                          <MenuItem key={index} value={key}>
-                            {key}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl>
-                </div>
-              </td>
-              <td>
-                <TextField
-                  fullWidth
-                  label="Scan Product Name or Number"
-                  variant="outlined"
-                  value={scannedData}
-                  onChange={(e) => setScannedData(e.target.value)}
-                />
-              </td>
-            </tr>
-          </thead>
-        </table>
-        <Button onClick={() => exportToExcel('verified')}>Export Verified Data</Button>
+        <div className="table-scroll">
+          <table className='table'>
+            <thead>
+              <tr>
+                <td>
+                  <div>
+                    <FormControl fullWidth variant="outlined">
+                      <InputLabel>Select Column</InputLabel>
+                      <Select
+                        value={selectedColumn}
+                        onChange={(e) => setSelectedColumn(e.target.value)}
+                        label="Select Column"
+                      >
+                        {tableData.length > 0 &&
+                          Object.keys(tableData[0]).map((key, index) => (
+                              <MenuItem key={index} value={key}>
+                                {key}
+                              </MenuItem>
+                            
+                          ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                </td>
+                <td>
+                  <TextField
+                    fullWidth
+                    label="Scan Product Name or Number"
+                    variant="outlined"
+                    value={scannedData}
+                    onChange={(e) => setScannedData(e.target.value)}
+                  />
+                </td>
+              </tr>
+            </thead>
+          </table>
+          <div className="table-content">
+          <Button onClick={() => exportToExcel('verified')}>Export Verified Data</Button>
         <Button onClick={() => exportToExcel('notVerified')}>Export Not Verified Data</Button>
         <Button onClick={() => exportToExcel('allData')}>Export All Data</Button>
         <Button onClick={() => saveAndExit()}>Save and Exit</Button>
-        <table className="table">
-          <thead>
-            <tr>
-              {tableData.length > 0 &&
-                Object.keys(tableData[0]).map((key, index) => (
-                  <th key={index}>{key}</th>
+            <table className="table">
+              <thead>
+                <tr>
+                  {tableData.length > 0 &&
+                    Object.keys(tableData[0]).map((key, index) => (
+                      <th key={index}>{key}</th>
+                    ))}
+                </tr>
+              </thead>
+              
+                {tableData.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    style={{
+                      backgroundColor: row.Status === 'Verified' ? '#90EE90' : 'white',
+                    }}
+                  >
+                    {Object.values(row).map((value, colIndex) => (
+                      <td key={colIndex}>{value}</td>
+                    ))}
+                  </tr>
                 ))}
-            </tr>
-          </thead>
-          
-            {tableData.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                style={{
-                  backgroundColor: row.Status === 'Verified' ? '#90EE90' : 'white',
-                }}
-              >
-                {Object.values(row).map((value, colIndex) => (
-                  <td key={colIndex}>{value}</td>
-                ))}
-               
-              </tr>
-            ))}
-          
-        </table>
+              
+            </table>
+          </div>
+        </div>
+       
       </div>
     </div>
   );
