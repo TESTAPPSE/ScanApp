@@ -8,26 +8,26 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
-// CSS for the inline navbar
+
 const navbarStyle = {
-   backgroundColor: '#1f4d7e', // Blue background color
-  padding: '10px 10px', // Adjust padding as needed
+  backgroundColor: '#1f4d7e',
+  padding: '10px 10px',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  position: 'fixed', // Make the navbar fixed
-  top: '0', // Set the top position to 0 to fix it at the top
-  width: '98%', // Make the navbar full width
+  position: 'fixed',
+  top: '0',
+  width: '98%',
   zIndex: '1000',
-  borderRadius: '15px 15px 15px 15px'
-  
+  borderRadius: '15px 15px 15px 15px',
+  marginTop: '5px',
 };
 
 const navbarTextStyle = {
-  color: '#fff', // White text color
-  fontSize: '26px', // Adjust font size as needed
+  color: '#fff',
+  fontSize: '26px',
   fontWeight: 'bold',
-};                                              
+};
 
 function TableData() {
   const { tableName } = useParams();
@@ -49,12 +49,6 @@ function TableData() {
     }
   }, [scannedData, selectedColumn, tableData]);
 
-  // useEffect(() => {
-  //   if (manualVerificationData && selectedColumn) {
-  //     verifyData(manualVerificationData);
-  //   }
-  // }, [manualVerificationData, selectedColumn, tableData]);
-
   const fetchTableData = (tableName) => {
     fetch(`http://10.110.21.216:5000/data/${tableName}`)
       .then((response) => response.json())
@@ -73,7 +67,7 @@ function TableData() {
     const matchingRow = tableData.find((row) => {
       if (selectedColumn === 'id') {
         return row[selectedColumn] === dataToVerify;
-      } else if (row[selectedColumn] && row[selectedColumn]===(dataToVerify)) {
+      } else if (row[selectedColumn] && row[selectedColumn] === dataToVerify) {
         return true;
       }
       return false;
@@ -87,7 +81,6 @@ function TableData() {
     }
   };
 
-
   const exportToExcel = (type) => {
     const filteredData = tableData.filter((row) => {
       if (type === 'verified') {
@@ -95,7 +88,7 @@ function TableData() {
       } else if (type === 'notVerified') {
         return row.Status !== 'Verified';
       }
-      return true; // Export both
+      return true;
     });
     const currentDate = new Date();
     const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}-${
@@ -113,14 +106,10 @@ function TableData() {
 
   const saveAndExit = async () => {
     try {
-      // Check if all rows are verified
       const allVerified = tableData.every((row) => row.Status === 'Verified');
-
-      // Prepare the new table name based on the old table name
       const oldTableName = tableName;
       let newTableName;
 
-      // Check if the table name already contains "_unfinished" or "_verified"
       if (oldTableName.includes('_unfinished') && allVerified) {
         newTableName = oldTableName.replace('_unfinished', '_verified');
       } else if (oldTableName.includes('_verified') && !allVerified) {
@@ -148,104 +137,125 @@ function TableData() {
             });
           })
       );
-
     } catch (error) {
       console.error(error);
     }
     navigate('/PA1');
   };
 
+  // Check if the user is logged in
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+  // Redirect to login if not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/');
+    }
+  }, [isLoggedIn, navigate]);
+
   return (
     <div>
-      <div style={navbarStyle}>
-        <div style={navbarTextStyle}>SEBN,TN</div>
-        <div style={navbarTextStyle}><span style={{fontSize:"18px",cursor:"pointer"}} onClick={()=>navigate("/")}>LogOut</span></div>
-        </div>
-      <div className="table-container" style={{marginTop:"70px"}}>
-        <h2>File Data: {tableName}</h2>
-        <div className="table-scroll">
-          <table className='table'>
-            <thead>
-              <tr>
-                <td>
-                  <div>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel>Select Column</InputLabel>
-                      <Select
-                        value={selectedColumn}
-                        onChange={(e) => setSelectedColumn(e.target.value)}
-                        label="Select Column"
-                      >
-                        {tableData.length > 0 &&
-                          Object.keys(tableData[0]).map((key, index) => (
-                            <MenuItem key={index} value={key}>
-                              {key}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </FormControl>
-                  </div>
-                </td>
-                <td>
-                  <TextField
-                    fullWidth
-                    label="Scan Product Name or Number"
-                    variant="outlined"
-                    value={scannedData}
-                    onChange={(e) => setScannedData(e.target.value)}
-                   
-                  />
-                </td>
-                <td>
-                  <TextField
-                    fullWidth
-                    label="Manual Verification Data"
-                    variant="outlined"
-                    value={manualVerificationData}
-                    onChange={(e) => setManualVerificationData(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        verifyData(manualVerificationData);
-                        setManualVerificationData('');
-                      }
-                    }}
-                  />
-                </td>
-              </tr>
-            </thead>
-          </table>
-          <div className="table-content">
-            <Button onClick={() => exportToExcel('verified')}>Export Verified Data</Button>
-            <Button onClick={() => exportToExcel('notVerified')}>Export Not Verified Data</Button>
-            <Button onClick={() => exportToExcel('allData')}>Export All Data</Button>
-            <Button onClick={() => saveAndExit()}>Save and Exit</Button>
-            <table className="table">
-              <thead>
-                <tr>
-                  {tableData.length > 0 &&
-                    Object.keys(tableData[0]).map((key, index) => (
-                      <th key={index}>{key}</th>
-                    ))}
-                </tr>
-              </thead>
-             
-                {tableData.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    style={{
-                      backgroundColor: row.Status === 'Verified' ? '#90EE90' : 'white',
-                    }}
-                  >
-                    {Object.values(row).map((value, colIndex) => (
-                      <td key={colIndex}>{value}</td>
-                    ))}
+      {isLoggedIn ? (
+        <div>
+          <div style={navbarStyle}>
+            <div style={navbarTextStyle}>SEBN,TN</div>
+            <div style={navbarTextStyle}>
+              <span
+                style={{ fontSize: '18px', cursor: 'pointer' }}
+                onClick={() => navigate('/')}
+              >
+                LogOut
+              </span>
+            </div>
+          </div>
+          <div className="table-container" style={{ marginTop: '70px' }}>
+            <h2>File Data: {tableName}</h2>
+            <div className="table-scroll">
+              <table className='table'>
+                <thead>
+                  <tr>
+                    <td>
+                      <div>
+                        <FormControl fullWidth variant="outlined">
+                          <InputLabel>Select Column</InputLabel>
+                          <Select
+                            value={selectedColumn}
+                            onChange={(e) => setSelectedColumn(e.target.value)}
+                            label="Select Column"
+                          >
+                            {tableData.length > 0 &&
+                              Object.keys(tableData[0]).map((key, index) => (
+                                <MenuItem key={index} value={key}>
+                                  {key}
+                                </MenuItem>
+                              ))}
+                          </Select>
+                        </FormControl>
+                      </div>
+                    </td>
+                    <td>
+                      <TextField
+                        fullWidth
+                        label="Scan Product Name or Number"
+                        variant="outlined"
+                        value={scannedData}
+                        onChange={(e) => setScannedData(e.target.value)}
+                      />
+                    </td>
+                    <td>
+                      <TextField
+                        fullWidth
+                        label="Manual Verification Data"
+                        variant="outlined"
+                        value={manualVerificationData}
+                        onChange={(e) => setManualVerificationData(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            verifyData(manualVerificationData);
+                            setManualVerificationData('');
+                          }
+                        }}
+                      />
+                    </td>
                   </tr>
-                ))}
-       
-            </table>
+                </thead>
+              </table>
+              <div className="table-content">
+                <Button onClick={() => exportToExcel('verified')}>Export Verified Data</Button>
+                <Button onClick={() => exportToExcel('notVerified')}>Export Not Verified Data</Button>
+                <Button onClick={() => exportToExcel('allData')}>Export All Data</Button>
+                <Button onClick={() => saveAndExit()}>Save and Exit</Button>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {tableData.length > 0 &&
+                        Object.keys(tableData[0]).map((key, index) => (
+                          <th key={index}>{key}</th>
+                        ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tableData.map((row, rowIndex) => (
+                      <tr
+                        key={rowIndex}
+                        style={{
+                          backgroundColor: row.Status === 'Verified' ? '#90EE90' : 'white',
+                        }}
+                      >
+                        {Object.values(row).map((value, colIndex) => (
+                          <td key={colIndex}>{value}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <p>User is not logged in</p>
+      )}
     </div>
   );
 }

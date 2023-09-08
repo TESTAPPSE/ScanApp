@@ -1,5 +1,5 @@
 // Login.js
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -13,6 +13,11 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  useEffect(() => {
+    // Initialize isLoggedIn to false when the component mounts
+    localStorage.setItem('isLoggedIn', 'false');
+    console.log(localStorage.getItem('isLoggedIn') === 'true')
+  }, []);
 //last
   const handleLogin = async () => {
     try {
@@ -23,8 +28,10 @@ const Login = () => {
   
         if (response.data.success) {
           // Authentication successful, you can redirect or perform other actions here
+          localStorage.setItem('isLoggedIn', 'true');
           navigate('/PA1');
         } else {
+          localStorage.setItem('isLoggedIn', 'false');
          navigate('/');
         }
       } catch (error) {

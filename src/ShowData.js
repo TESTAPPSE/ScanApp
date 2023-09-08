@@ -656,106 +656,135 @@ const navbarTextStyle = {
       .catch((error) => {                                                                                                  
         console.error(error);                                                                                                  
       });                                                                                                  
-  };                                                                                                  
+  };       
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+  // Redirect to login if not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/');
+    }
+  }, [isLoggedIn, navigate]);                                                                                           
                                                                                                   
-  return (                                                                                                  
-    <div>       
-        <div style={navbarStyle}>
-        <div style={navbarTextStyle}>SEBN,TN</div>
-        <div style={navbarTextStyle}><span style={{fontSize:"18px",cursor:"pointer"}} onClick={()=>navigate("/")}>LogOut</span></div>
-        </div>                                                                                           
-      <div className="table-container" style={{marginTop:"70px"}}>                                                                                                  
-        <input                                                                                                  
-          type="file"                                                                                                  
-          accept=".xlsx"                                                                                                  
-          style={{ display: 'none' }}                                                                                                  
-          id="file-upload"                                                                                                  
-          onChange={handleFileUpload}                                                                                                  
-        />                                                                                                  
-        <label htmlFor="file-upload">                                                                                                  
-          <IconButton                                                                                                  
-            color="warning"                                                                                                  
-            aria-label="upload file here"                                                                                                  
-            component="span"                                                                                                  
-          >                                                                                                  
-            <UploadFileIcon />            
-            <span style={{ marginLeft:"10px",fontSize:"17px"}}>  Select File here</span>                                                                                        
-          </IconButton>                                                                                                  
-                                                                                                       
-        </label>                                                                                                  
-        <Button onClick={uploadFile} style={{marginLeft:"50px"}}>Upload</Button>                                                                                                  
-                                                                                                  
-        <h2 style={{ marginTop: '50px' }}>Uploaded Files:</h2>                                                                                                  
-                                                                                                  
-        <table className="table">                                                                                                  
-          <thead>                                                                                                  
-            <tr>                                                                                                  
-              <th>File Name</th>                                                                                                  
-              <th>Added Date</th>                                                                                                  
-              <th>Status</th>                                                                                                  
-              <th>Action</th>                                                                                                  
-            </tr>                                                                                                  
-          </thead>                                                                                                  
-          <tbody>                                                                                                  
-            {tableNames.map((tableName, index) => {                                                                                                  
-              const name = tableName.split('_')[0] || 'N/A';                                                                                                  
-              const datePart = tableName.split('_').slice(1).join('_');                                                                                                  
-              const date = datePart ? formatDate(datePart) : 'N/A';                                                                                                  
-              const status = getStatusFromTableName(tableName);                                                                                                  
-                                                                                                  
-              return (                                                                                                  
-                <tr key={index}                                                                                                  
-                style={{                                                                                                  
-                  backgroundColor: {status} === 'Verified' ? '#90EE90' : 'white',                                                                                                  
-                }}>                                                                                                  
-                  <td>{name}</td>                                                                                                  
-                  <td>{date}</td>                                                                                                  
-                  <td>{status}</td>                                                                                                  
-                  <td>                                                                                                  
-                    <Link to={`/table/${tableName || ''}`}>Show Data</Link>                                                                                                  
-                    <Button onClick={() => openDeleteConfirmation(tableName)}>Delete</Button>                                                                                                  
-                  </td>                                                                                                  
-                </tr>                                                                                                  
-              );                                                                                                  
-            })}                                                                                                  
-          </tbody>                                                                                                  
-        </table>                                                                                                  
-                                                                                                  
-        {selectedTable && (                                                                                                  
-          <div className="table-container">                                                                                                  
-            <h2>Table Data: {selectedTable}</h2>                                                                                                  
-            <table className="table">                                                                                                  
-              <thead>                                                                                                  
-                <tr>                                                                                                  
-                  {Object.keys(tableData[0]).map((key, index) => (                                                                                                  
-                    <th key={index}>{key}</th>                                                                                                  
-                  ))}                                                                                                  
-                </tr>                                                                                                  
-              </thead>                                                                                                  
-              <tbody>                                                                                                  
-                {tableData.map((row, rowIndex) => (                                                                                                  
-                  <tr key={rowIndex}>                                                                                                  
-                    {Object.values(row).map((value, colIndex) => (                                                                                                  
-                      <td key={colIndex}>{value}</td>                                                                                                  
-                    ))}                                                                                                  
-                  </tr>                                                                                                  
-                ))}                                                                                                  
-              </tbody>                                                                                                  
-            </table>                                                                                                  
-          </div>                                                                                                  
-        )}                                                                                                  
-      </div>                                                                                                  
-                                                                                                  
-      {/* Confirmation Dialog */}                                                                                                  
-      <ConfirmationDialog                                                                                                  
-        open={deleteConfirmationOpen}                                                                                                  
-        message={`Are you sure you want to delete the table: ${tableToDelete}?`}                                                                                                  
-        onConfirm={confirmDelete}                                                                                                  
-        onCancel={closeDeleteConfirmation}                                                                                                  
-      />                                                                                                  
-    </div>                                                                                                  
-  );                                                                                                  
-}                                                                                                  
+  return (
+    <div>
+      {isLoggedIn ? (
+        <div>
+          <div style={navbarStyle}>
+            <div style={navbarTextStyle}>SEBN, TN</div>
+            <div style={navbarTextStyle}>
+              <span
+                style={{ fontSize: '18px', cursor: 'pointer' }}
+                onClick={() => navigate('/')}
+              >
+                LogOut
+              </span>
+            </div>
+          </div>
+          <div className="table-container" style={{ marginTop: '70px' }}>
+            <input
+              type="file"
+              accept=".xlsx"
+              style={{ display: 'none' }}
+              id="file-upload"
+              onChange={handleFileUpload}
+            />
+            <label htmlFor="file-upload">
+              <IconButton
+                color="warning"
+                aria-label="upload file here"
+                component="span"
+              >
+                <UploadFileIcon />
+                <span style={{ marginLeft: '10px', fontSize: '17px' }}>
+                  Select File here
+                </span>
+              </IconButton>
+            </label>
+            <Button onClick={uploadFile} style={{ marginLeft: '50px' }}>
+              Upload
+            </Button>
+            <h2 style={{ marginTop: '50px' }}>Uploaded Files:</h2>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>File Name</th>
+                  <th>Added Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableNames.map((tableName, index) => {
+                  const name = tableName.split('_')[0] || 'N/A';
+                  const datePart = tableName.split('_').slice(1).join('_');
+                  const date = datePart ? formatDate(datePart) : 'N/A';
+                  const status = getStatusFromTableName(tableName);
+
+                  return (
+                    <tr
+                      key={index}
+                      style={{
+                        backgroundColor:
+                          status === 'Verified' ? '#90EE90' : 'white',
+                      }}
+                    >
+                      <td>{name}</td>
+                      <td>{date}</td>
+                      <td>{status}</td>
+                      <td>
+                        <Link to={`/table/${tableName || ''}`}>Show Data</Link>
+                        <Button
+                          onClick={() => openDeleteConfirmation(tableName)}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {selectedTable && (
+              <div className="table-container">
+                <h2>Table Data: {selectedTable}</h2>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {Object.keys(tableData[0]).map((key, index) => (
+                        <th key={index}>{key}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tableData.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {Object.values(row).map((value, colIndex) => (
+                          <td key={colIndex}>{value}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Confirmation Dialog */}
+          <ConfirmationDialog
+            open={deleteConfirmationOpen}
+            message={`Are you sure you want to delete the table: ${tableToDelete}?`}
+            onConfirm={confirmDelete}
+            onCancel={closeDeleteConfirmation}
+          />
+        </div>
+      ) : (
+        <p>User is not logged in</p>
+      )}
+    </div>
+  );
+}                                                                                           
                                                                                                   
 export default App;                                                                                                  
                                                                                                   
