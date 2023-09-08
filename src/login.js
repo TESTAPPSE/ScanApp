@@ -1,5 +1,4 @@
-// Login.js
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -12,36 +11,41 @@ import axios from 'axios';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
   const navigate = useNavigate();
+
   useEffect(() => {
     // Initialize isLoggedIn to false when the component mounts
     localStorage.setItem('isLoggedIn', 'false');
-    console.log(localStorage.getItem('isLoggedIn') === 'true')
+    console.log(localStorage.getItem('isLoggedIn') === 'true');
   }, []);
-//last
+
   const handleLogin = async () => {
     try {
-        const response = await axios.post('http://10.110.21.216:5000/login', {
-          username,
-          password,
-        });
-  
-        if (response.data.success) {
-          // Authentication successful, you can redirect or perform other actions here
-          localStorage.setItem('isLoggedIn', 'true');
-          navigate('/PA1');
-        } else {
-          localStorage.setItem('isLoggedIn', 'false');
-         navigate('/');
-        }
-      } catch (error) {
-        console.error('Login failed:', error);
+      const response = await axios.post('http://10.110.21.216:5000/login', {
+        username,
+        password,
+      });
+
+      if (response.data.success) {
+        // Authentication successful, you can redirect or perform other actions here
+        localStorage.setItem('isLoggedIn', 'true');
+        navigate('/PA1');
+      } else {
+        // Authentication failed, show an error message
+        localStorage.setItem('isLoggedIn', 'false');
+        setErrorMessage('Invalid credentials. Please try again.');
       }
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle network or server errors here
+      setErrorMessage('An error occurred. Please try again later.');
+    }
   };
 
   return (
     <Container maxWidth="xs">
-      <Paper elevation={3} sx={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center',marginTop:"90px" }}>
+      <Paper elevation={3} sx={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '90px' }}>
         <LockIcon sx={{ fontSize: '3rem', marginBottom: '1rem' }} />
         <Typography variant="h5" component="div" sx={{ marginBottom: '1rem' }}>
           Login
@@ -63,6 +67,11 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {errorMessage && ( // Display error message when it is not empty
+          <Typography color="error" sx={{ marginBottom: '1rem' }}>
+            {errorMessage}
+          </Typography>
+        )}
         <Button variant="contained" color="primary" fullWidth onClick={handleLogin}>
           Login
         </Button>
