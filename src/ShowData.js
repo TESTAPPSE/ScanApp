@@ -671,7 +671,7 @@ const navbarTextStyle = {
       {isLoggedIn ? (
         <div>
           <div style={navbarStyle}>
-            <div style={navbarTextStyle}>SEBN, TN</div>
+            <div style={navbarTextStyle}>SEBN,TN</div>
             <div style={navbarTextStyle}>
               <span
                 style={{ fontSize: '18px', cursor: 'pointer' }}

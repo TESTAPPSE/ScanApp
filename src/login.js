@@ -46,6 +46,9 @@ const Login = () => {
   return (
     <Container maxWidth="xs">
       <Paper elevation={3} sx={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '90px' }}>
+        {/* Add your company logo image here */}
+        <img src="sebn1.png" alt="Company Logo" style={{ width: '270px', height: '150px', marginBottom: '1rem' }} />
+
         <LockIcon sx={{ fontSize: '3rem', marginBottom: '1rem' }} />
         <Typography variant="h5" component="div" sx={{ marginBottom: '1rem' }}>
           Login
@@ -67,7 +70,7 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {errorMessage && ( // Display error message when it is not empty
+        {errorMessage && (
           <Typography color="error" sx={{ marginBottom: '1rem' }}>
             {errorMessage}
           </Typography>
